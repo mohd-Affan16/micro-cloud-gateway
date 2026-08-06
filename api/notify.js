@@ -5,7 +5,9 @@ export default function handler(req, res) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
-  const timestamp = new Date().toLocaleTimeString();
+    // Forces Vercel's cloud container to convert its internal clock directly to Indian Standard Time (IST)
+  const timestamp = new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' });
+
   const alertMessage = `🚨 [MICRO-CLOUD EMERGENCY] A user tried to log into your cluster at ${timestamp}, but your desk ESP32 is completely out of power! Plug the battery in, you idiot!`;
 
   // Explicit parameters required for Telegram's secure backend handshake payload
