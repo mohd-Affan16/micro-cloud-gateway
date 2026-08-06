@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micro-Cloud | System Gateway</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: radial-gradient(circle at top, #1a1c29 0%, #0d0e15 100%); color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #252836; border: 1px solid #dc3545; border-radius: 16px; padding: 40px; text-align: center; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), 0 0 35px rgba(220, 53, 69, 0.15); width: 340px; display: none; }
+        h1 { color: #dc3545; margin: 0 0 10px 0; font-size: 24px; text-shadow: 0 0 15px rgba(220, 53, 69, 0.4); }
+        p { color: #94a3b8; font-size: 14px; margin: 0 0 25px 0; line-height: 1.5; }
+        .btn-alert { background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%); color: white; border: none; padding: 14px 20px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3); transition: all 0.2s ease; }
+        .btn-alert:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(220, 53, 69, 0.5); }
+        .loader { border: 4px solid #1a1c29; border-top: 4px solid #28a745; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="loadingStatus" class="loader"></div>
+
+    <div id="errorCard" class="card">
+        <h1>☁️ Connection Offline</h1>
+        <p>The private Micro-Cloud cluster is currently offline for scheduled battery maintenance or power optimization.</p>
+        <button class="btn-alert" onclick="notifyAuthority()">Notify System Administrator</button>
+    </div>
+
+<script>
+    const ESP32_IP = "http://192.168.0.188"; 
+
+    async function checkServerStatus() {
+        try {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), 2500);
+            await fetch(ESP32_IP + "/", { method: 'GET', mode: 'no-cors', signal: controller.signal });
+            clearTimeout(id);
+            window.location.href = ESP32_IP;
+        } catch (error) {
+            document.getElementById('loadingStatus').style.display = 'none';
+            document.getElementById('errorCard').style.display = 'block';
+        }
+    }
+
+    // --- 🚀 CALL THE SECURE BACKEND ROUTE ---
+    function notifyAuthority() {
+        // Calls the serverless function path securely without leaking any keys
+        fetch('/api/notify')
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                alert("✅ Administrator notified via secure Vercel environment pipeline!");
+            } else {
+                alert("❌ Notification failed at cloud API layer.");
+            }
+        })
+        .catch(() => {
+            alert("❌ Network transit failure. The API endpoint is unreachable.");
+        });
+    }
+
+    window.onload = checkServerStatus;
+</script>
+</body>
+</html>
