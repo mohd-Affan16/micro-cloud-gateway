@@ -4,7 +4,7 @@ export default async function handler(req, res) {
 
   const client_id = process.env.GOOGLE_CLIENT_ID;
   const client_secret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirect_uri = "https://micro-cloud-gateway.vercel.app";
+  const redirect_uri = "https://micro-cloud-gateway.vercel.app/api/callback";
 
   try {
     const tokenResponse = await fetch('https://googleapis.com', {
