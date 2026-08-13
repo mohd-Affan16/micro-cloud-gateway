@@ -30,8 +30,8 @@ export default async function handler(req, res) {
     const userEmail = profileData.email || "unknown@gmail.com";
     const userName = profileData.name || "User";
 
-    const local_esp32_destination = `http://192.168.0.188/?email=${encodeURIComponent(userEmail)}&name=${encodeURIComponent(userName)}`;
-    
+// AFTER (correct - hits /secure-entry which is meant for authenticated users)
+const local_esp32_destination = `http://192.168.0.188/secure-entry?email=${encodeURIComponent(userEmail)}&name=${encodeURIComponent(userName)}`;
     return res.redirect(local_esp32_destination);
 
   } catch (error) {
