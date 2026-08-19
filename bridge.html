@@ -105,19 +105,41 @@
 
     if (email) document.getElementById('userEmail').value = email;
 
-    async function checkEsp32() {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 4000);
-        await fetch(`${ESP32_IP}/`, { method: 'HEAD', mode: 'no-cors', signal: controller.signal });
-        clearTimeout(timeout);
-        window.location.href = `${ESP32_IP}/secure-entry?email=${encodeURIComponent(email || 'unknown@gmail.com')}&name=${encodeURIComponent(name || 'User')}`;
-      } catch (e) {
-        document.getElementById('checkingState').style.display = 'none';
-        document.getElementById('maintenanceState').style.display = 'block';
-      }
-    }
+    // async function checkEsp32() {
+    //   try {
+    //     const controller = new AbortController();
+    //     const timeout = setTimeout(() => controller.abort(), 4000);
+    //     await fetch(`${ESP32_IP}/`, { method: 'HEAD', mode: 'no-cors', signal: controller.signal });
+    //     clearTimeout(timeout);
+    //     window.location.href = `${ESP32_IP}/secure-entry?email=${encodeURIComponent(email || 'unknown@gmail.com')}&name=${encodeURIComponent(name || 'User')}`;
+    //   } catch (e) {
+    //     document.getElementById('checkingState').style.display = 'none';
+    //     document.getElementById('maintenanceState').style.display = 'block';
+    //   }
+    // }
+function checkEsp32() {
 
+  console.log('[Micro-Cloud] Attempting direct browser connection to ESP32...');
+
+  const target =
+    `${ESP32_IP}/secure-entry?` +
+    `email=${encodeURIComponent(email || 'unknown@gmail.com')}` +
+    `&name=${encodeURIComponent(name || 'User')}`;
+
+  console.log('[Micro-Cloud] ESP32 target:', target);
+
+  /*
+   * IMPORTANT:
+   * Do NOT use fetch() here.
+   *
+   * The Vercel HTTPS page cannot reliably fetch the
+   * local HTTP ESP32 because of browser security rules.
+   *
+   * Direct browser navigation DOES work.
+   */
+
+  window.location.href = target;
+}
     async function notifyAdmin() {
       const btn = document.getElementById('notifyBtn');
       btn.disabled = true; btn.innerText = 'Sending...';
