@@ -26,48 +26,59 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const reqId = params.get('reqId');
-    
-    if (!reqId) {
+    const email = (params.get('email') || '').trim().toLowerCase();
+    const name = params.get('name') || 'User';
+
+    if (!email) {
       document.getElementById('spinner').style.display = 'none';
-      document.getElementById('statusTitle').innerText = "❌ Invalid Request";
-      document.getElementById('statusTitle').style.color = "#dc3545";
-      document.getElementById('statusText').innerText = "Missing session ID. Please try logging in again.";
+      document.getElementById('statusTitle').innerText = '❌ Invalid Request';
+      document.getElementById('statusTitle').style.color = '#dc3545';
+      document.getElementById('statusText').innerText = 'Missing email address. Please try logging in again.';
+    } else {
+      document.getElementById('userInfo').innerText = `${name} | ${email}`;
     }
 
+    let finished = false;
+
     async function checkStatus() {
+      if (!email || finished) return;
+
       try {
-        const res = await fetch(`/api/status?reqId=${reqId}`);
+        const res = await fetch(`/api/status?email=${encodeURIComponent(email)}`, {
+          cache: 'no-store'
+        });
+
         const data = await res.json();
-        
+
         if (data.status === 'approved') {
+          finished = true;
           document.getElementById('spinner').style.display = 'none';
-          document.getElementById('statusTitle').innerText = "✅ Approved!";
+          document.getElementById('statusTitle').innerText = '✅ Approved!';
           document.getElementById('statusTitle').className = 'approved';
-          document.getElementById('statusText').innerText = "Redirecting you to the cluster...";
-          document.getElementById('userInfo').innerText = `${data.name} | ${data.email}`;
+          document.getElementById('statusText').innerText = 'Redirecting you to the cluster...';
+          document.getElementById('userInfo').innerText = `${data.name || name} | ${data.email || email}`;
+
           setTimeout(() => {
-            window.location.href = `https://micro-cloud-gateway.vercel.app/bridge.html?email=${encodeURIComponent(data.email)}&name=${encodeURIComponent(data.name)}`;
-          }, 1500);
+            window.location.href = `https://micro-cloud-gateway.vercel.app/bridge.html?email=${encodeURIComponent(data.email || email)}&name=${encodeURIComponent(data.name || name)}`;
+          }, 1000);
           return;
         }
-        
+
         if (data.status === 'denied') {
+          finished = true;
           document.getElementById('spinner').style.display = 'none';
-          document.getElementById('statusTitle').innerText = "❌ Access Denied";
+          document.getElementById('statusTitle').innerText = '❌ Access Denied';
           document.getElementById('statusTitle').className = 'denied';
-          document.getElementById('statusText').innerText = "The administrator rejected your login request.";
+          document.getElementById('statusText').innerText = 'The administrator rejected your login request.';
           return;
         }
-        
-        // Still pending
+
         setTimeout(checkStatus, 2000);
-        
       } catch (e) {
         setTimeout(checkStatus, 3000);
       }
     }
-    
+
     checkStatus();
   </script>
 </body>
